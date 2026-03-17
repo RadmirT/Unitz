@@ -1,0 +1,8 @@
+<Project>
+  <PropertyGroup>
+      <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)unitz.stylecop.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" />
+  </ItemGroup>
+</Project>
