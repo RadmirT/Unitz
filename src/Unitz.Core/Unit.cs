@@ -1,227 +1,217 @@
-﻿namespace Unitz.Core;
+using System.Numerics;
+using Unitz.Core.UnitOperations.Binary;
 
-using System.Text;
+namespace Unitz.Core;
 
 /// <summary>
-/// Представляет единицу измерения физической величины.
+/// Represents a unit of measure for a physical quantity.
 /// </summary>
 /// <remarks>
-/// Единица измерения определяется размерностью, множителем к базовой единице и смещением относительно нуля базовой шкалы.
-/// Единицы с ненулевым смещением (например, градусы Цельсия или Фаренгейта) называются аффинными.
-/// Для таких единиц арифметические операции над значениями имеют смысл только после приведения к абсолютной шкале (без смещения),
-/// иначе результаты будут физически некорректны.
-/// <para>
-/// Например, 20 C соответствуют 68 F. Если просто умножить эти значения на 2, получим 40 C и 136 F — но эти температуры уже
-/// не эквивалентны. Корректное преобразование должно выполняться через абсолютные значения (в данном случае в Кельвинах).
-/// </para>
+/// The base class defines common unit properties: dimension, conversion to and from
+/// the base unit, and equality logic.
 /// </remarks>
-public class Unit : IEquatable<Unit>
+/// <typeparam name="T">The numeric value type.</typeparam>
+public abstract class Unit<T> : IEquatable<Unit<T>>, IUnit<T> where T : struct, INumber<T>
 {
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="Unit"/> с указанными параметрами.
+    /// Initializes a new instance of the <see cref="Unit{T}"/> class.
     /// </summary>
-    /// <param name="name">Инвариантное имя единицы.</param>
-    /// <param name="symbol">Символ единицы.</param>
-    /// <param name="dimension">Размерность единицы.</param>
-    /// <param name="scale">Множитель к базовой единице измерения.</param>
-    /// <param name="offset">Смещение относительно нуля базовой единицы измерения.</param>
-    public Unit(string? name, string? symbol, Dimension dimension, decimal scale = 1, decimal offset = 0)
-        : this(name, symbol, dimension, new Rational(scale), new Rational(offset))
+    /// <param name="dimension">The unit dimension.</param>
+    /// <param name="family">The unit family.</param>
+    internal Unit(Dimension dimension, UnitFamily family)
     {
-    }
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="Unit"/> для указанной размерности.
-    /// </summary>
-    /// <param name="dimension">Размерность единицы измерения.</param>
-    /// <param name="scale">Множитель к базовой единице измерения.</param>
-    /// <param name="offset">Смещение относительно нуля базовой единицы измерения.</param>
-    public Unit(Dimension dimension, decimal scale = 1, decimal offset = 0)
-        : this(null, null, dimension, new Rational(scale), new Rational(offset))
-    {
-    }
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="Unit"/> с рациональными параметрами.
-    /// </summary>
-    /// <param name="dimension">Размерность единицы измерения.</param>
-    /// <param name="scale">Множитель к базовой единице измерения.</param>
-    /// <param name="offset">Смещение относительно нуля базовой единицы измерения.</param>
-    public Unit(Dimension dimension, Rational scale, Rational offset)
-        : this(null, null, dimension, scale, offset)
-    {
-    }
-
-    /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="Unit"/>.
-    /// </summary>
-    /// <param name="name">Инвариантное имя единицы.</param>
-    /// <param name="symbol">Символ единицы.</param>
-    /// <param name="dimension">Размерность единицы.</param>
-    /// <param name="scale">Множитель к базовой единице измерения.</param>
-    /// <param name="offset">Смещение относительно нуля базовой единицы измерения.</param>
-    public Unit(string? name, string? symbol, Dimension dimension, Rational? scale, Rational? offset)
-    {
-        var s = scale ?? Rational.One;
-        var o = offset ?? Rational.Zero;
-        this.InvariantName = name ?? GenerateName(dimension, s, o);
-        this.InvariantSymbol = symbol ?? GenerateName(dimension, s, o);
         this.Dimension = dimension;
-        this.Scale = s;
-        this.Offset = o;
+        this.Family = family;
     }
 
     /// <summary>
-    /// Инвариантное (стабильное) имя единицы измерения.
-    /// </summary>
-    public string InvariantName { get; }
-
-    /// <summary>
-    /// Символ единицы измерения (например, "m", "s", "kg").
-    /// </summary>
-    public string InvariantSymbol { get; }
-
-    /// <summary>
-    /// Размерность единицы измерения.
+    /// Gets the unit dimension.
     /// </summary>
     public Dimension Dimension { get; }
 
     /// <summary>
-    /// Множитель относительно базовой единицы измерения.
+    /// Gets the unit family.
     /// </summary>
-    public Rational Scale { get; }
+    public UnitFamily Family { get; }
 
     /// <summary>
-    /// Смещение нуля относительно базовой единицы (используется для аффинных единиц).
+    /// Multiplies two units of measure and returns the result unit.
     /// </summary>
-    public Rational Offset { get; }
+    /// <param name="left">The left unit.</param>
+    /// <param name="right">The right unit.</param>
+    /// <returns>The result unit of multiplication.</returns>
+    public static Unit<T> operator *(Unit<T>? left, Unit<T>? right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+        return BinaryUnitOperations<T>.Execute(BinaryUnitOperationType.Multiply, left, right);
+    }
 
     /// <summary>
-    /// Возвращает признак того, является ли единица измерения аффинной.
+    /// Divides one unit of measure by another and returns the result unit.
     /// </summary>
-    public bool IsAffine => this.Offset != Rational.Zero;
+    /// <param name="left">The dividend unit.</param>
+    /// <param name="right">The divisor unit.</param>
+    /// <returns>The result unit of division.</returns>
+    public static Unit<T> operator /(Unit<T>? left, Unit<T>? right)
+    {
+        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(right);
+        return BinaryUnitOperations<T>.Execute(BinaryUnitOperationType.Divide, left, right);
+    }
 
     /// <summary>
-    /// Проверяет равенство двух единиц измерения.
+    /// Determines whether two units of measure are equal.
     /// </summary>
-    /// <param name="left">Левая единица измерения.</param>
-    /// <param name="right">Правая единица измерения.</param>
-    /// <returns><c>true</c>, если единицы равны; иначе <c>false</c>.</returns>
-    public static bool operator ==(Unit? left, Unit? right)
+    /// <param name="left">The left unit.</param>
+    /// <param name="right">The right unit.</param>
+    /// <returns><c>true</c> if the units are equal; otherwise, <c>false</c>.</returns>
+    public static bool operator ==(Unit<T>? left, Unit<T>? right)
     {
         return left?.Equals(right) ?? right is null;
     }
 
     /// <summary>
-    /// Проверяет неравенство двух единиц измерения.
+    /// Determines whether two units of measure are not equal.
     /// </summary>
-    /// <param name="left">Левая единица измерения.</param>
-    /// <param name="right">Правая единица измерения.</param>
-    /// <returns><c>true</c>, если единицы различаются; иначе <c>false</c>.</returns>
-    public static bool operator !=(Unit? left, Unit? right)
+    /// <param name="left">The left unit.</param>
+    /// <param name="right">The right unit.</param>
+    /// <returns><c>true</c> if the units are different; otherwise, <c>false</c>.</returns>
+    public static bool operator !=(Unit<T>? left, Unit<T>? right)
     {
         return !(left == right);
     }
 
     /// <summary>
-    /// Проверяет, имеют ли две указанные единицы измерения одинаковую размерность.
+    /// Determines whether two units of measure have the same dimension.
     /// </summary>
-    /// <param name="unitA">Первая единица измерения для сравнения.</param>
-    /// <param name="unitB">Вторая единица измерения для сравнения.</param>
+    /// <param name="unitA">The first unit to compare.</param>
+    /// <param name="unitB">The second unit to compare.</param>
     /// <returns>
-    /// <c>true</c>, если обе единицы принадлежат одной и той же физической размерности 
-    /// (например, метры и футы — обе представляют длину); 
-    /// иначе — <c>false</c>.
+    /// <c>true</c> if both units have the same physical dimension; otherwise, <c>false</c>.
     /// </returns>
-    public static bool IsSameDimension(Unit unitA, Unit unitB) => unitA.Dimension.Equals(unitB.Dimension); 
+    public static bool IsSameDimension(IUnit unitA, IUnit unitB)
+    {
+        ArgumentNullException.ThrowIfNull(unitA);
+        ArgumentNullException.ThrowIfNull(unitB);
+
+        return unitA.Dimension == unitB.Dimension;
+    }
 
     /// <summary>
-    /// Определяет, эквивалентна ли текущая единица измерения другой.
+    /// Determines whether this unit is equivalent to another unit.
     /// </summary>
-    /// <param name="other">Единица измерения для сравнения.</param>
-    /// <returns><c>true</c>, если единицы эквивалентны; иначе <c>false</c>.</returns>
-    public bool Equals(Unit? other)
+    /// <param name="other">The unit to compare with.</param>
+    /// <returns><c>true</c> if the units are equivalent; otherwise, <c>false</c>.</returns>
+    public bool Equals(Unit<T>? other)
     {
         if (other is null)
         {
             return false;
         }
 
-        return this.Dimension.Equals(other.Dimension)
-               && this.Scale.Equals(other.Scale)
-               && this.Offset.Equals(other.Offset);
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+        
+        return this.Dimension == other.Dimension
+               && this.Family == other.Family
+               && this.EqualsCore(other);
     }
 
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is Unit u && this.Equals(u);
+        return obj is Unit<T> u && this.Equals(u);
     }
 
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return HashCode.Combine(this.Dimension, this.Scale, this.Offset);
-    }
-
-    /// <inheritdoc />
-    public override string ToString()
-    {
-        return $"{this.InvariantName} [{this.InvariantSymbol}] {{{this.Dimension}}}";
+        return HashCode.Combine(this.Family, this.Dimension, this.GetHashCodeCore());
     }
 
     /// <summary>
-    /// Преобразует значение из текущей единицы измерения в базовые единицы СИ.
+    /// Converts a value from this unit to the base unit.
     /// </summary>
-    /// <param name="value">Значение в текущей единице измерения.</param>
-    /// <returns>Значение в базовых единицах измерения.</returns>
-    public double ToSiValue(double value)
-    {
-        return (value * (double)this.Scale) + (double)this.Offset;
-    }
-        
+    /// <param name="value">The value in this unit.</param>
+    /// <returns>The value in the base unit.</returns>
+    public abstract T ToBaseValue(T value);
+
     /// <summary>
-    /// Проверяет, имеют ли две единицы измерения одинаковую размерность.
+    /// Converts a value from this unit to the specified unit.
     /// </summary>
-    /// <param name="other">Единица измерения, с которой выполняется сравнение.</param>
+    /// <param name="value">The value in this unit.</param>
+    /// <param name="targetUnit">The target unit.</param>
+    /// <returns>The value in the target unit.</returns>
+    public T ConvertValueTo(T value, IUnit<T> targetUnit)
+    {
+        ArgumentNullException.ThrowIfNull(targetUnit);
+
+        if (!this.IsSameDimension(targetUnit))
+        {
+            throw new InvalidOperationException(
+                $"Cannot convert a value from unit dimension {this.Dimension} to unit dimension {targetUnit.Dimension}.");
+        }
+
+        if (this.Equals(targetUnit))
+        {
+            return value;
+        }
+
+        return targetUnit.FromBaseValue(this.ToBaseValue(value));
+    }
+
+    /// <summary>
+    /// Determines whether this unit has the same dimension as another unit.
+    /// </summary>
+    /// <param name="other">The unit to compare with.</param>
     /// <returns>
-    /// <c>true</c>, если обе единицы относятся к одной и той же физической размерности 
-    /// (например, метры и футы — обе имеют размерность длины); 
-    /// иначе — <c>false</c>.
+    /// <c>true</c> if both units have the same physical dimension; otherwise, <c>false</c>.
     /// </returns>
-    public bool IsSameDimension(Unit other) => IsSameDimension(this, other); 
-    
+    public bool IsSameDimension(IUnit other) => IsSameDimension(this, other);
+
+
     /// <summary>
-    /// Преобразует значение из базовых единиц СИ в текущую единицу измерения.
+    /// Determines whether this unit has the specified dimension.
     /// </summary>
-    /// <param name="value">Значение в базовых единицах измерения.</param>
-    /// <returns>Значение в текущей единице измерения.</returns>
-    public double FromSiValue(double value)
+    /// <param name="dimension">The dimension to compare with.</param>
+    /// <returns>
+    /// <c>true</c> if the unit has the specified physical dimension; otherwise, <c>false</c>.
+    /// </returns>
+    public bool IsSameDimension(Dimension dimension) => this.Dimension == dimension;
+
+    /// <summary>
+    /// Determines whether this unit is equivalent to another unit.
+    /// </summary>
+    /// <param name="other">The unit to compare with.</param>
+    /// <returns><c>true</c> if the units are equivalent; otherwise, <c>false</c>.</returns>
+    public bool Equals(IUnit other)
     {
-        return (value - (double)this.Offset) / (double)this.Scale;
+        return other is not null
+               && this.Dimension == other.Dimension
+               && this.Family == other.Family
+               && this.EqualsCore(other);
     }
 
     /// <summary>
-    /// Генерирует инвариантное имя единицы измерения на основе её размерности, множителя и смещения.
+    /// Converts a value from the base unit to this unit.
     /// </summary>
-    /// <param name="dimension">Размерность единицы измерения.</param>
-    /// <param name="scale">Множитель относительно базовой единицы.</param>
-    /// <param name="offset">Смещение относительно нуля базовой единицы.</param>
-    /// <returns>Сформированное инвариантное имя.</returns>
-    private static string GenerateName(Dimension dimension, Rational scale, Rational offset)
-    {
-        var stringBuilder = new StringBuilder();
-        stringBuilder.Append($"{dimension}");
-        if (scale != Rational.One)
-        {
-            stringBuilder.Append($" {scale}");
-        }
+    /// <param name="value">The value in the base unit.</param>
+    /// <returns>The value in this unit.</returns>
+    public abstract T FromBaseValue(T value);
 
-        if (offset != Rational.Zero)
-        {
-            stringBuilder.Append($" {offset}");
-        }
+    /// <summary>
+    /// Compares fields specific to derived unit implementations.
+    /// </summary>
+    /// <param name="other">The unit to compare with.</param>
+    /// <returns><c>true</c> if the fields are equal; otherwise, <c>false</c>.</returns>
+    protected abstract bool EqualsCore(IUnit other);
 
-        return stringBuilder.ToString();
-    }
+    /// <summary>
+    /// Gets the hash code for fields specific to derived unit implementations.
+    /// </summary>
+    /// <returns>The hash code.</returns>
+    protected abstract int GetHashCodeCore();
 }

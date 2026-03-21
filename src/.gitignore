@@ -459,6 +459,29 @@ Thumbs.db
 ehthumbs.db
 ehthumbs_vista.db
 
+# AI agent / assistant instructions
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+GUIDE.md
+
+# GitHub Copilot
+.github/copilot-instructions.md
+.github/instructions/
+*.instructions.md
+
+# Cursor
+.cursorrules
+.cursor/rules/
+*.mdc
+
+# Gigacode
+.gigacode
+
+# Windsurf / Codeium
+.windsurfrules
+.windsurf/
+
 # Dump file
 *.stackdump
 
