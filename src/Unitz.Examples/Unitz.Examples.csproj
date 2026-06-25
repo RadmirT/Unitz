@@ -10,7 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Unitz\Unitz.csproj" />
+      <ProjectReference Include="..\Unitz.Units\Unitz.Units.csproj" />
     </ItemGroup>
 
 </Project>

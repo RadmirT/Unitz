@@ -1,4 +1,4 @@
-using Unitz;
+using Unitz.Units;
 
 PrintHeader("Length addition and base values");
 {

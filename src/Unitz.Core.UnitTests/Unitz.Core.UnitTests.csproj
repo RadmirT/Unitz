@@ -18,7 +18,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Unitz.Core\Unitz.Core.csproj" />
-        <ProjectReference Include="..\Unitz\Unitz.csproj" />
+        <ProjectReference Include="..\Unitz.Units\Unitz.Units.csproj" />
     </ItemGroup>
 
 </Project>

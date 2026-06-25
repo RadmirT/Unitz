@@ -1,6 +1,6 @@
 namespace Unitz.Core.UnitTests;
 
-using Unitz.Core;
+using Core;
 using Xunit;
 
 public class UnitTests
