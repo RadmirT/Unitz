@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <CheckEolTargetFramework>false</CheckEolTargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <UseRoslynSourceGeneration>true</UseRoslynSourceGeneration>
+        <PackageId>Unitz</PackageId>
+        <Title>Unitz</Title>
+        <Authors>Radmir Tagirov</Authors>
+        <Description>A .NET library for working with physical quantities and units of measure, including dimension-aware values, unit conversion, arithmetic operations, and generated strongly typed quantity APIs.</Description>
+        <PackageTags>units;unit-conversion;quantities;measurement;generic-math</PackageTags>
+        <PackageProjectUrl>https://github.com/RadmirT/Unitz</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RadmirT/Unitz.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Copyright>Copyright (c) 2026 Radmir Tagirov</Copyright>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Unitz.Core\Unitz.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(UseRoslynSourceGeneration)' == 'true'">
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)\bin\$(Configuration)\$(TargetFramework)\Generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(UseRoslynSourceGeneration)' == 'true'">
+        <ProjectReference Include="..\Unitz.Core.Generators\Unitz.Core.Generators.csproj"
+                          OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"/>
+        <Compile Remove="Generated\**\*.cs" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build-test-pack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            7.0.x
+
+      - name: Authenticate GitHub Packages
+        run: |
+          dotnet nuget update source github-radmirt \
+            --username "radmirt" \
+            --password "${{ secrets.ACCESS_TOKEN }}" \
+            --store-password-in-clear-text \
+            --configfile src/nuget.config
+
+      - name: Restore
+        run: dotnet restore src/Unitz.sln
+
+      - name: Build
+        run: dotnet build src/Unitz.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test src/Unitz.Core.UnitTests/Unitz.Core.UnitTests.csproj --configuration Release --no-build
+
+      - name: Pack
+        run: dotnet pack src/Unitz/Unitz.csproj --configuration Release --no-build --output ./artifacts
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: unitz-nuget
+          path: ./artifacts/*.nupkg
+          if-no-files-found: error
