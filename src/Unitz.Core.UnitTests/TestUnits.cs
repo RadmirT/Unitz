@@ -1,7 +1,7 @@
 namespace Unitz.Core.UnitTests;
 
 using System.Numerics;
-using Unitz.Core;
+using Core;
 
 internal sealed class TestLengthUnit<T> : LinearUnit<T>, IUnit<TestLengthUnit<T>, T>
     where T : struct, INumber<T>

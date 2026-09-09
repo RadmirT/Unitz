@@ -1,5 +1,5 @@
 using Rationalz;
-using Unitz;
+using Unitz.Units;
 using Xunit;
 
 namespace Unitz.Core.UnitTests;

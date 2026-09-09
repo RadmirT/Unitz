@@ -6,7 +6,23 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <PackageId>Unitz.Core</PackageId>
+        <Title>Unitz.Core</Title>
+        <Authors>Radmir Tagirov</Authors>
+        <Description>Core abstractions and shared runtime types for Unitz packages.</Description>
+        <PackageTags>units;unit-conversion;quantities;measurement;generic-math</PackageTags>
+        <PackageProjectUrl>https://github.com/RadmirT/Unitz</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/RadmirT/Unitz.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseFile>LICENSE</PackageLicenseFile>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <Copyright>Copyright (c) 2026 Radmir Tagirov</Copyright>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+      <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 
 <!--    <ItemGroup>-->
 <!--      <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">-->

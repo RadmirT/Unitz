@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unitz.Core.UnitTests", "Uni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unitz.Core", "Unitz.Core\Unitz.Core.csproj", "{8F771A05-95A6-4C6B-89D9-57AEF1EE266E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unitz", "Unitz\Unitz.csproj", "{58FD712F-B5A4-44B7-845F-56FCA44A896D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unitz.Units", "Unitz.Units\Unitz.Units.csproj", "{58FD712F-B5A4-44B7-845F-56FCA44A896D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unitz.Examples", "Unitz.Examples\Unitz.Examples.csproj", "{C39479BD-C3B1-4E42-9AC9-DF3A1034AE4D}"
 EndProject

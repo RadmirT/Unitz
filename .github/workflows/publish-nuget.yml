@@ -80,15 +80,29 @@ jobs:
         run: dotnet build src/Unitz.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test src/Unitz.Core.UnitTests/Unitz.Core.UnitTests.csproj --configuration Release --no-build
+        run: dotnet test src/Unitz.sln --configuration Release --no-build
 
       - name: Pack
-        run: dotnet pack src/Unitz/Unitz.csproj --configuration Release --no-build --output ./artifacts /p:PackageVersion=${{ env.PACKAGE_VERSION }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          dotnet pack src/Unitz.Core/Unitz.Core.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./artifacts \
+            /p:PackageVersion="${PACKAGE_VERSION}"
+
+          dotnet pack src/Unitz.Units/Unitz.Units.csproj \
+            --configuration Release \
+            --no-build \
+            --output ./artifacts \
+            /p:PackageVersion="${PACKAGE_VERSION}"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v6
         with:
-          name: unitz-nuget-${{ env.PACKAGE_VERSION }}
+          name: unitz-packages-${{ env.PACKAGE_VERSION }}
           path: ./artifacts/*.nupkg
           if-no-files-found: error
 

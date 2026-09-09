@@ -3,8 +3,8 @@ using Rationalz;
 namespace Unitz.Core.UnitTests;
 
 using System.Numerics;
-using Unitz.Core;
-using Unitz;
+using Core;
+using Units;
 using Xunit;
 
 public class GeneratedQuantityTests
